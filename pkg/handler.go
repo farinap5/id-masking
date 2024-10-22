@@ -10,18 +10,20 @@ import (
 	"strconv"
 )
 
+type Sec struct {
+	enc internal.Encoder
+}
+
 var Map = map[string][]int{
 	"elf": {1, 2},
 	"gnome": {3, 4},
 }
 
-var Enc internal.Encoder
-
-var Usrs = map[int]Person {
+var Entries = map[int]Person {
 	1: Person{Name: "Pietro", 		Age: 15},
 	2: Person{Name: "Lucas", 		Age: 15},
-	3: Person{Name: "Andrey", 		Age: 15},
-	4: Person{Name: "Kerleston", 	Age: 15},
+	3: Person{Name: "Fernanda", Age: 15},
+	4: Person{Name: "Sofia", 	Age: 15},
 }
 
 type Response struct {
@@ -78,7 +80,7 @@ func ListP(w http.ResponseWriter, r *http.Request) {
 	accessList := Map[u]
 	var respList []Resume
 	for _,v := range accessList {
-		respList = append(respList, Resume{Id: v, Name: Usrs[v].Name})
+		respList = append(respList, Resume{Id: v, Name: Entries[v].Name})
 	}
 
 	respJsoned.Payload = respList
@@ -114,7 +116,7 @@ func GetP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respJsoned.Payload = Usrs[intPid]
+	respJsoned.Payload = Entries[intPid]
 	jsoned, err := json.Marshal(respJsoned)
 	if err != nil {
 		w.Write([]byte(fmt.Sprintf("{\"err\":\"%s\"}", err.Error())))
@@ -125,7 +127,7 @@ func GetP(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsoned)
 }
 
-func ListPSecure(w http.ResponseWriter, r *http.Request) {
+func (s *Sec)ListPSecure(w http.ResponseWriter, r *http.Request) {
 	token := r.Header.Get("Token")
 	w.Header().Set("Content-Type","application/json")
 	respJsoned := Response{Status: "OK"}
@@ -141,7 +143,7 @@ func ListPSecure(w http.ResponseWriter, r *http.Request) {
 	accessList := Map[u]
 	var respList []ResumeS
 	for _,v := range accessList {
-		respList = append(respList, ResumeS{Id: Enc.Encode(n, v), Name: Usrs[v].Name})
+		respList = append(respList, ResumeS{Id: s.enc.Encode(n, v), Name: Entries[v].Name})
 	}
 
 	respJsoned.Payload = respList
@@ -155,7 +157,7 @@ func ListPSecure(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsoned)
 }
 
-func GetPSecure(w http.ResponseWriter, r *http.Request) {
+func (s *Sec)GetPSecure(w http.ResponseWriter, r *http.Request) {
 	token := r.Header.Get("Token")
 	w.Header().Set("Content-Type","application/json")
 	respJsoned := Response{Status: "OK"}
@@ -170,7 +172,7 @@ func GetPSecure(w http.ResponseWriter, r *http.Request) {
 
 	pid := r.URL.Query().Get("id")
 
-	nounce,id := Enc.Decode(pid)
+	nounce,id := s.enc.Decode(pid)
 	if nounce != n {
 		w.Write([]byte("{\"err\":\"nounce do not match\"}"))
 		log.Printf("access uri=%s u=%s n=%s err=\"%s\"\n", r.URL.Path, u, n, "nounce do not match")
@@ -183,7 +185,7 @@ func GetPSecure(w http.ResponseWriter, r *http.Request) {
 		return
 	}*/
 
-	respJsoned.Payload = Usrs[id]
+	respJsoned.Payload = Entries[id]
 	jsoned, err := json.Marshal(respJsoned)
 	if err != nil {
 		w.Write([]byte(fmt.Sprintf("{\"err\":\"%s\"}", err.Error())))
