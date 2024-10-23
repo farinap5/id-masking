@@ -6,11 +6,11 @@ This project tries to address some simple problems regarding the IDOR mitigation
 - Make discovery unfeasible through ID increment in brute force attacks;
 - Decrease the difficulty of implementing mitigation at the data level in already consolidated projects.
 
-For this POC the nounce could be anything, like the username, any number user specific or just the group the user is member of.
+For this POC the **nounce** could be anything, like the username, any number user specific or just the group the user is member of.
 
-Before being sent to the frontend the ID is processed into a simple struct containing the users nounce and the object ID. The struct has both data separated by two dots `<nounce>:<id>`. This sequence is encrypted using a block cipher. Since the data could get too short asymmetric might be used as well.
+Before being sent to the frontend the ID is processed into a simple struct containing the users **nounce** and the object ID. The struct has both data separated by two dots `<nounce>:<id>`. This sequence is encrypted using a block cipher. Since the data could get too short asymmetric might be used as well.
 
-The frontend must return this same encrypted message that will be reverted and verified before the ID being processed. The handler must verify the nounce before any action and forward the ID of successfully verified.
+The frontend must return this same encrypted message that will be reverted and verified before the ID being processed. The handler must verify the **nounce** before any action and forward the ID of successfully verified.
 
 Id encoding implementation.
 ```lua
@@ -51,4 +51,13 @@ The following code extracted from [pkg/server.go](pkg/server.go) contains the ro
 	// Secured routes
 	serverMux.HandleFunc("/person/list/secure/", s.ListPSecure)
 	serverMux.HandleFunc("/person/get/secure/", s.GetPSecure)
+```
+
+
+For testing use the following access tokens:
+
+```
+elf   eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiZWxmIiwibm91bmNlIjoiMTIzIn0.vj-ba125-s8rdDxaUuKBwdjmrMAkLK-LsegQd4900aI
+
+gnome eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiZ25vbWUiLCJub3VuY2UiOiIzMjEifQ.GE1h-24lJ-iNqA8yAsV53wFeImtOZJSNS8OSCgvSD5o
 ```

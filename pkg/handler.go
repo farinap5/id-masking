@@ -8,6 +8,7 @@ import (
 	"mvpidx/internal"
 	"net/http"
 	"strconv"
+	"github.com/brianvoe/sjwt"
 )
 
 type Sec struct {
@@ -132,12 +133,33 @@ func (s *Sec)ListPSecure(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type","application/json")
 	respJsoned := Response{Status: "OK"}
 
-	n, u, err := decToken(token)
+	claims, err := sjwt.Parse(token)
+	if err != nil {
+		w.Write([]byte(fmt.Sprintf("{\"err\":\"%s\"}", err.Error())))
+		log.Printf("access uri=%s u=%s n=%s err=\"%s\"\n", r.URL.Path, "none", "none", err.Error())
+		return
+	}
+
+	if !sjwt.Verify(token, []byte("test123")) {
+		w.Write([]byte(fmt.Sprintf("{\"err\":\"%s\"}", "invalid session token")))
+		log.Printf("access uri=%s u=%s n=%s err=\"%s\"\n", r.URL.Path, "none", "none", err.Error())
+		return
+	}
+
+	u,err := claims.GetStr("user")
+	if err != nil {
+		w.Write([]byte(fmt.Sprintf("{\"err\":\"%s\"}", err.Error())))
+		log.Printf("access uri=%s u=%s n=%s err=\"%s\"\n", r.URL.Path, u, "none", err.Error())
+		return
+	}
+
+	n,err := claims.GetStr("nounce")
 	if err != nil {
 		w.Write([]byte(fmt.Sprintf("{\"err\":\"%s\"}", err.Error())))
 		log.Printf("access uri=%s u=%s n=%s err=\"%s\"\n", r.URL.Path, u, n, err.Error())
 		return
 	}
+
 	log.Printf("access uri=%s u=%s n=%s\n", r.URL.Path, u, n)
 
 	accessList := Map[u]
@@ -162,7 +184,27 @@ func (s *Sec)GetPSecure(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type","application/json")
 	respJsoned := Response{Status: "OK"}
 
-	n, u, err := decToken(token)
+	claims, err := sjwt.Parse(token)
+	if err != nil {
+		w.Write([]byte(fmt.Sprintf("{\"err\":\"%s\"}", err.Error())))
+		log.Printf("access uri=%s u=%s n=%s err=\"%s\"\n", r.URL.Path, "none", "none", err.Error())
+		return
+	}
+
+	if !sjwt.Verify(token, []byte("test123")) {
+		w.Write([]byte(fmt.Sprintf("{\"err\":\"%s\"}", "invalid session token")))
+		log.Printf("access uri=%s u=%s n=%s err=\"%s\"\n", r.URL.Path, "none", "none", err.Error())
+		return
+	}
+
+	u,err := claims.GetStr("user")
+	if err != nil {
+		w.Write([]byte(fmt.Sprintf("{\"err\":\"%s\"}", err.Error())))
+		log.Printf("access uri=%s u=%s n=%s err=\"%s\"\n", r.URL.Path, u, "none", err.Error())
+		return
+	}
+
+	n,err := claims.GetStr("nounce")
 	if err != nil {
 		w.Write([]byte(fmt.Sprintf("{\"err\":\"%s\"}", err.Error())))
 		log.Printf("access uri=%s u=%s n=%s err=\"%s\"\n", r.URL.Path, u, n, err.Error())

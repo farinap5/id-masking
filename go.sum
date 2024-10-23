@@ -1,0 +1,4 @@
+github.com/brianvoe/sjwt v0.5.1 h1:OKwnUrrVMnP81N9S5+ylgZECUEwW4Uw6W6J0FgcIZfw=
+github.com/brianvoe/sjwt v0.5.1/go.mod h1:GsyrNi4zWvWAcsVGNNMULQ8SfDMmJ2ybzAyPjNQJJL8=
+github.com/golang-jwt/jwt v3.2.2+incompatible h1:IfV12K8xAKAnZqdXVzCZ+TOjboZ2keLg81eXfW3O+oY=
+github.com/golang-jwt/jwt v3.2.2+incompatible/go.mod h1:8pz2t5EyA70fFQQSrl6XZXzqecmYZeUEB8OUGHkxJ+I=
